@@ -4,7 +4,11 @@
 ## 安装证书和配置代理
 ### 参考运行命令如下
 ```bash
-bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' -m all -i 192.168.10.244 -p 9091 -c '/Users/x'x'x/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem'
+bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' \
+  -m all \
+  -i 192.168.10.244 \
+  -p 9091 \
+  -c '/Users/x'x'x/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem'
 ```
 ### 运行结果如下
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -58,7 +62,8 @@ Checking adb command...
 ## 删除证书和代理
 ### 参考运行命令如下
 ```bash
-bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' -m revertProxy
+bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' \
+  -m revertProxy
 ```
 ### 运行结果如下
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -122,29 +127,46 @@ mitmproxy --set confdir=~/.mitmproxy
 ### 使用方法
 #### 安装证书和配置代理
 ```bash
-bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' \
+  -m all \
+  -i 127.0.0.1 \
+  -p 8080 \
+  -c ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 参数说明：
 
 - -m all : 执行全部操作（安装证书和配置代理）
-- -i 127.0.0.1 : 代理服务器IP地址
+- -i 127.0.0.1 : 代理服务器IP地址  **【强烈建议使用局域网IP而非127.0.0.1】**
 - -p 8080 : 代理服务器端口
 - -c ~/.mitmproxy/mitmproxy-ca-cert.pem : mitmproxy证书路径
 如果不指定证书路径，脚本会尝试使用默认位置： ~/.mitmproxy/mitmproxy-ca-cert.pem
 #### 仅配置代理
 ```bash
-bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m proxy -i 127.0.0.1 -p 8080
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' \
+  -m proxy \
+  -i 127.0.0.1 \
+  -p 8080
 ```
 #### 仅安装证书
 ```bash
-bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m certificate -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' \
+  -m certificate \
+  -i 127.0.0.1 \
+  -p 8080 \
+  -c ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 #### 恢复代理设置（移除代理）
 ```bash
-bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m revertProxy
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' \
+  -m revertProxy
 ```
 #### 包含物理设备
 默认情况下，脚本只处理模拟器设备。如果要包含物理设备，添加 --include-physical 参数：
 ```bash
-bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem --include-physical
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' \
+  -m all \
+  -i 127.0.0.1 \
+  -p 8080 \
+  -c ~/.mitmproxy/mitmproxy-ca-cert.pem \
+  --include-physical
 ```
