@@ -4,7 +4,7 @@
 ## 安装证书和配置代理
 ### 参考运行命令如下
 ```bash
-bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' -m all -i 192.168.10.244 -p 9091 -c '/Users/hujia/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem'
+bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Resources/install_certificate_android_emulator.sh' -m all -i 192.168.10.244 -p 9091 -c '/Users/x'x'x/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem'
 ```
 ### 运行结果如下
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -23,7 +23,7 @@ bash '/Applications/Proxyman.app/Contents/Frameworks/ProxymanCore.framework/Reso
    Mode                : all
    IP Address          : 192.168.10.244
    Port                : 9091
-   Certificate Path    : /Users/hujia/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem
+   Certificate Path    : /Users/xxx/Library/Application Support/com.proxyman.NSProxy/app-data/proxyman-ca.pem
    Include Physical Dev: false
 
 Checking adb command...
@@ -43,7 +43,7 @@ Checking adb command...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🤖 Processing Emulator Device: emulator-5554
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-/Users/hujia/Library/Application Support/com.proxyman.NSPr... 1 file pushed, 0 skipped. 5.8 MB/s (1903 bytes in 0.000s)
+/Users/xxx/Library/Application Support/com.proxyman.NSPr... 1 file pushed, 0 skipped. 5.8 MB/s (1903 bytes in 0.000s)
 📂 Using certificate source: /apex/com.android.conscrypt/cacerts
 ✅ Certificate injection completed for Emulator Device emulator-5554
 
@@ -119,10 +119,10 @@ mitmproxy --set confdir=~/.mitmproxy
 - Android模拟器已启动或物理设备已连接
 - 仅支持带有Google API的Android模拟器
 - 不支持Google Play Store版本
-## 使用方法
-### 安装证书和配置代理
+### 使用方法
+#### 安装证书和配置代理
 ```bash
-bash 'install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 参数说明：
 
@@ -131,20 +131,20 @@ bash 'install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1
 - -p 8080 : 代理服务器端口
 - -c ~/.mitmproxy/mitmproxy-ca-cert.pem : mitmproxy证书路径
 如果不指定证书路径，脚本会尝试使用默认位置： ~/.mitmproxy/mitmproxy-ca-cert.pem
-### 仅配置代理
+#### 仅配置代理
 ```bash
-bash 'install_certificate_android_emulator-mitmproxy-mac.sh' -m proxy -i 127.0.0.1 -p 8080
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m proxy -i 127.0.0.1 -p 8080
 ```
-### 仅安装证书
+#### 仅安装证书
 ```bash
-bash 'install_certificate_android_emulator-mitmproxy-mac.sh' -m certificate -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m certificate -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
-### 恢复代理设置（移除代理）
+#### 恢复代理设置（移除代理）
 ```bash
-bash 'install_certificate_android_emulator-mitmproxy-mac.sh' -m revertProxy
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m revertProxy
 ```
-### 包含物理设备
+#### 包含物理设备
 默认情况下，脚本只处理模拟器设备。如果要包含物理设备，添加 --include-physical 参数：
 ```bash
-bash '/Users/hujia/NovaFoundry/fetcher-app/mitmproxy/install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem --include-physical
+bash './install_certificate_android_emulator-mitmproxy-mac.sh' -m all -i 127.0.0.1 -p 8080 -c ~/.mitmproxy/mitmproxy-ca-cert.pem --include-physical
 ```
