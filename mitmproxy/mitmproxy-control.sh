@@ -8,7 +8,7 @@
 #
 
 # 配置文件路径
-CONFIG_FILE="$(dirname "$0")/config.yaml"
+CONFIG_FILE="${HOME}/.mitmproxy/config.yaml"
 PID_FILE="$(dirname "$0")/.mitmproxy.pid"
 
 # 颜色定义
@@ -111,6 +111,7 @@ start_mitmproxy() {
                          --listen-port "$listen_port" \
                          --mode "$upstream_mode" \
                          --allow-hosts "$allow_hosts" \
+                         -s "$(dirname "$0")/tiktok_handler.py" \
                          >> "$(dirname "$0")/mitmproxy.log" 2>&1 &
             
             echo $! > "$PID_FILE"
@@ -127,7 +128,8 @@ start_mitmproxy() {
             # 启动mitmproxy控制台
             mitmproxy --listen-port "$listen_port" \
                      --mode "$upstream_mode" \
-                     --allow-hosts "$allow_hosts"
+                     --allow-hosts "$allow_hosts" \
+                     -s "$(dirname "$0")/tiktok_handler.py"
             ;;
             
         dump)
@@ -140,6 +142,7 @@ start_mitmproxy() {
             nohup mitmdump --listen-port "$listen_port" \
                          --mode "$upstream_mode" \
                          --allow-hosts "$allow_hosts" \
+                         -s "$(dirname "$0")/tiktok_handler.py" \
                          >> "$(dirname "$0")/mitmproxy.log" 2>&1 &
             
             echo $! > "$PID_FILE"
@@ -268,6 +271,41 @@ remove_proxy() {
     bash "$cert_script" -m revertProxy
 }
 
+# 重启mitmproxy
+restart_mitmproxy() {
+    local mode=$1
+    
+    # 获取当前运行模式（如果正在运行）
+    local current_mode=""
+    if is_running; then
+        local pid=$(cat "$PID_FILE")
+        if ps -p "$pid" -o command= | grep -q "mitmweb"; then
+            current_mode="web"
+        elif ps -p "$pid" -o command= | grep -q "mitmdump"; then
+            current_mode="dump"
+        else
+            current_mode="console"
+        fi
+    fi
+    
+    # 如果没有指定模式，则使用当前模式（如果正在运行）
+    if [ -z "$mode" ] && [ -n "$current_mode" ]; then
+        mode="$current_mode"
+        print_message "$BLUE" "使用当前模式重启: $mode"
+    elif [ -z "$mode" ]; then
+        # 如果没有指定模式且当前未运行，则默认使用web模式
+        mode="web"
+        print_message "$BLUE" "使用默认模式重启: $mode"
+    fi
+    
+    # 停止当前运行的mitmproxy
+    stop_mitmproxy
+    
+    # 启动mitmproxy
+    print_message "$GREEN" "🔄 重启 mitmproxy..."
+    start_mitmproxy "$mode"
+}
+
 # 显示使用帮助
 print_usage() {
     echo "用法: $0 <命令> [选项]"
@@ -275,6 +313,7 @@ print_usage() {
     echo "命令:"
     echo "  start <模式>    启动mitmproxy (模式: web, console, dump)"
     echo "  stop            停止mitmproxy"
+    echo "  restart [模式]  重启mitmproxy (可选指定模式，默认使用当前模式)"
     echo "  status          检查mitmproxy状态"
     echo "  cert            安装mitmproxy证书到Android设备"
     echo "  revert          移除Android设备上的代理设置"
@@ -284,6 +323,8 @@ print_usage() {
     echo "  $0 start web    以Web界面模式启动mitmproxy"
     echo "  $0 start console 以控制台模式启动mitmproxy"
     echo "  $0 start dump   以dump模式启动mitmproxy"
+    echo "  $0 restart      使用当前模式重启mitmproxy"
+    echo "  $0 restart web  以Web界面模式重启mitmproxy"
     echo "  $0 stop         停止mitmproxy"
     echo "  $0 status       检查mitmproxy状态"
     echo "  $0 cert         安装证书到Android设备"
@@ -323,6 +364,10 @@ main() {
             ;;
         stop)
             stop_mitmproxy
+            ;;
+        restart)
+            check_mitmproxy
+            restart_mitmproxy "$1"
             ;;
         status)
             check_status
