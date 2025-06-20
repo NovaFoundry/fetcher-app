@@ -88,8 +88,22 @@ Checking adb command...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ Proxy settings removed successfully for Emulator Device emulator-5554
 
-
-# mitmproxy 脚本
+# mitmproxy
+## 安装mitmproxy
+```bash
+brew install mitmproxy
+```
+## 生成mitmproxy证书
+安装mitmproxy后，它会自动在首次运行时生成证书。证书默认保存在以下位置：
+```plaintext
+~/.mitmproxy/mitmproxy-ca-cert.pem
+```
+如果您想手动生成或重新生成证书，可以运行：
+```bash
+mitmproxy --set confdir=~/.mitmproxy
+```
+然后按 q 退出，证书会被保存在配置目录中。
+## mitmproxy 脚本
 本脚本 install_certificate_android_emulator-mitmproxy-mac.sh 用于在Android模拟器或设备上安装mitmproxy证书并配置HTTP代理，基于Proxyman的原始脚本修改而来。
 
 
