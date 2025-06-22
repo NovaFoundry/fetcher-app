@@ -199,8 +199,21 @@ check_status() {
     fi
 }
 
-# 安装证书到Android设备
-install_certificate() {
+# 仅安装证书
+cert() {
+    local cert_script="$(dirname "$0")/install_certificate_android_emulator-mitmproxy-mac.sh"
+    
+    if [ ! -f "$cert_script" ]; then
+        print_message "$RED" "❌ 错误: 证书安装脚本不存在: $cert_script"
+        exit 1
+    fi
+    
+    print_message "$GREEN" "🔒 仅安装mitmproxy证书到Android设备..."
+    bash "$cert_script" -m certificate
+}
+
+# 仅配置代理
+proxy() {
     local cert_script="$(dirname "$0")/install_certificate_android_emulator-mitmproxy-mac.sh"
     local listen_port=$(get_config_value "listen_port")
     
@@ -211,55 +224,55 @@ install_certificate() {
     
     # 自动检测合适的IP地址
     local host_ip="127.0.0.1"
+    # 尝试获取本机非回环IP
+    print_message "$GREEN" "🔒 安装mitmproxy证书到Android设备..."
+    print_message "$YELLOW" "⚠️ 尝试获取本机非回环IP..."
     
-    # 检查是否在Docker环境中运行
-    if [ -f "/.dockerenv" ] || grep -q docker /proc/1/cgroup 2>/dev/null; then
-        print_message "$YELLOW" "⚠️ 检测到Docker环境，尝试获取宿主机IP..."
-        
-        # 尝试使用host.docker.internal (适用于Docker Desktop for Mac/Windows)
-        if ping -c 1 host.docker.internal &>/dev/null; then
-            host_ip=$(getent hosts host.docker.internal | awk '{ print $1 }')
-            print_message "$GREEN" "✅ 使用Docker宿主机IP: $host_ip (host.docker.internal)"
-        else
-            # 尝试获取默认网关IP (通常是Docker网桥上的宿主机IP)
-            local gateway_ip=$(ip route | grep default | awk '{print $3}')
-            if [ -n "$gateway_ip" ]; then
-                host_ip="$gateway_ip"
-                print_message "$GREEN" "✅ 使用Docker网关IP: $host_ip"
-            else
-                # 尝试获取非本地IP
-                local detected_ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
-                if [ -n "$detected_ip" ]; then
-                    host_ip="$detected_ip"
-                    print_message "$GREEN" "✅ 使用检测到的IP: $host_ip"
-                else
-                    print_message "$YELLOW" "⚠️ 无法自动检测宿主机IP，使用默认IP: $host_ip"
-                    print_message "$YELLOW" "  如果连接失败，请手动指定正确的宿主机IP"
-                fi
-            fi
-        fi
+    # 尝试获取非本地IP
+    local detected_ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+    if [ -n "$detected_ip" ]; then
+        host_ip="$detected_ip"
+        print_message "$GREEN" "✅ 使用检测到的IP: $host_ip"
     else
-        # 非Docker环境，尝试获取本机非回环IP
-        print_message "$GREEN" "🔒 安装mitmproxy证书到Android设备..."
-        print_message "$YELLOW" "⚠️ 尝试获取本机非回环IP..."
-        
-        # 尝试获取非本地IP
-        local detected_ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
-        if [ -n "$detected_ip" ]; then
-            host_ip="$detected_ip"
-            print_message "$GREEN" "✅ 使用检测到的IP: $host_ip"
-        else
-            print_message "$YELLOW" "⚠️ 无法自动检测本机IP，使用默认IP: $host_ip"
-            print_message "$YELLOW" "  如果连接失败，请手动指定正确的IP"
-        fi
+        print_message "$YELLOW" "⚠️ 无法自动检测本机IP，使用默认IP: $host_ip"
+        print_message "$YELLOW" "  如果连接失败，请手动指定正确的IP"
+    fi
+
+}
+
+# 安装证书并配置代理
+proxy_cert() {
+    local cert_script="$(dirname "$0")/install_certificate_android_emulator-mitmproxy-mac.sh"
+    local listen_port=$(get_config_value "listen_port")
+    
+    if [ ! -f "$cert_script" ]; then
+        print_message "$RED" "❌ 错误: 证书安装脚本不存在: $cert_script"
+        exit 1
     fi
     
-    print_message "$GREEN" "🔒 使用IP: $host_ip 安装mitmproxy证书到Android设备..."
+    # 自动检测合适的IP地址
+    local host_ip="127.0.0.1"
+    # 非Docker环境，尝试获取本机非回环IP
+    print_message "$GREEN" "🔒 安装mitmproxy证书到Android设备..."
+    print_message "$YELLOW" "⚠️ 尝试获取本机非回环IP..."
+    
+    # 尝试获取非本地IP
+    local detected_ip=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
+    if [ -n "$detected_ip" ]; then
+        host_ip="$detected_ip"
+        print_message "$GREEN" "✅ 使用检测到的IP: $host_ip"
+    else
+        print_message "$YELLOW" "⚠️ 无法自动检测本机IP，使用默认IP: $host_ip"
+        print_message "$YELLOW" "  如果连接失败，请手动指定正确的IP"
+    fi
+
+    print_message "$GREEN" "🔒 使用IP: $host_ip 安装mitmproxy证书并配置Android设备代理..."
     bash "$cert_script" -m all -i "$host_ip" -p "$listen_port"
+
 }
 
 # 移除Android设备上的代理设置
-remove_proxy() {
+revert() {
     local cert_script="$(dirname "$0")/install_certificate_android_emulator-mitmproxy-mac.sh"
     
     if [ ! -f "$cert_script" ]; then
@@ -315,7 +328,9 @@ print_usage() {
     echo "  stop            停止mitmproxy"
     echo "  restart <模式>  重启mitmproxy (可选指定模式，默认使用当前模式)"
     echo "  status          检查mitmproxy状态"
-    echo "  cert            安装mitmproxy证书到Android设备"
+    echo "  cert            仅安装mitmproxy证书到Android设备"
+    echo "  proxy           仅配置Android设备代理"
+    echo "  proxy-cert      安装mitmproxy证书并配置Android设备代理"
     echo "  revert          移除Android设备上的代理设置"
     echo "  help            显示此帮助信息"
     echo ""
@@ -327,8 +342,10 @@ print_usage() {
     echo "  $0 restart web   以Web界面模式重启mitmproxy"
     echo "  $0 stop          停止mitmproxy"
     echo "  $0 status        检查mitmproxy状态"
-    echo "  $0 cert          安装证书到Android设备"
-    echo "  $0 revert        移除Android设备上的代理设置"
+    echo "  $0 cert          仅安装证书"
+    echo "  $0 proxy         仅配置代理"
+    echo "  $0 proxy-cert    安装证书并配置代理"
+    echo "  $0 revert        移除代理设置"
 }
 
 # 主函数
@@ -373,10 +390,16 @@ main() {
             check_status
             ;;
         cert)
-            install_certificate
+            cert
+            ;;
+        proxy)
+            proxy
+            ;;
+        proxy-cert)
+            proxy_cert
             ;;
         revert)
-            remove_proxy
+            revert
             ;;
         help)
             print_usage
