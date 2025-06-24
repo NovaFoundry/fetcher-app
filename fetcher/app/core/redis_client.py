@@ -1,5 +1,5 @@
 import redis
-from core.config import settings
+from app.core.config import settings
 
 class RedisClient:
     """
@@ -25,4 +25,4 @@ class RedisClient:
         url = url.rsplit('/', 1)[0] + f'/{db}'
         return redis.Redis.from_url(url)
 
-redis_client = RedisClient() 
+redis_client = RedisClient()

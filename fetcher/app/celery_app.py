@@ -1,6 +1,6 @@
 # 使用相对导入替代绝对导入
 from celery import Celery
-from core.config import settings
+from app.core.config import settings
 
 # 创建Celery实例
 celery_app = Celery(
@@ -20,4 +20,4 @@ celery_app.conf.update(
     result_expires=settings.celery_config.get("result_expires"),
 )
 
-import tasks
+from app import tasks

@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Header, HTTPException, Depends, status
-from celery_app import celery_app
-from models.tiktok import SuggestionTaskRequest, CaptureDataRequest, TaskStatusResponse, SuggestionTaskResponse
+from app.celery_app import celery_app
+from app.models.tiktok import SuggestionTaskRequest, CaptureDataRequest, TaskStatusResponse, SuggestionTaskResponse
 from typing import Optional
-from core.redis_client import redis_client
-from core.idempotency import IdempotencyManager
-from core.task_status import TaskStatusManager
-from utils import generate_task_id
+from app.core.redis_client import redis_client
+from app.core.idempotency import IdempotencyManager
+from app.core.task_status import TaskStatusManager
+from app.utils import generate_task_id
 
 router = APIRouter()
 

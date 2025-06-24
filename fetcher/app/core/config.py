@@ -8,7 +8,7 @@ class Settings:
     """
     def __init__(self, config_path=None):
         if config_path is None:
-            config_path = Path(__file__).parent / "../config/config.yaml"
+            config_path = Path(__file__).parent / "../../config/config.yaml"
         with open(config_path, 'r', encoding='utf-8') as f:
             self._cfg = yaml.safe_load(f)
         # Celery配置

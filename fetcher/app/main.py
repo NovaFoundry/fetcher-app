@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from api import tiktok_user
-from core.config import settings
-from core.redis_client import redis_client
-from core.avd_manager import AVDManager
+from app.api import tiktok_user
+from app.core.config import settings
+from app.core.redis_client import redis_client
+from app.core.avd_manager import AVDManager
 
 app = FastAPI()
 
@@ -24,4 +24,4 @@ async def startup_event():
     print("[Startup] AVD设备账号配置已加载到Redis")
 
     # TODO: 调用核心初始化逻辑
-    pass 
+    pass

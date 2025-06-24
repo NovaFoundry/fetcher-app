@@ -1,5 +1,5 @@
 import redis
-from core.config import settings
+from app.core.config import settings
 import time
 
 # 设备-账号映射管理
@@ -63,4 +63,4 @@ class AVDManager:
         cooldown = int(settings.cooldown_seconds)
         key = f"{avd_prefix}{avd_ip}"
         cooldown_until = int(time.time()) + cooldown
-        self.redis.hmset(key, {'status': 'cooldown', 'cooldown_until': cooldown_until}) 
+        self.redis.hmset(key, {'status': 'cooldown', 'cooldown_until': cooldown_until})

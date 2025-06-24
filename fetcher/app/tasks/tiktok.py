@@ -1,7 +1,7 @@
 # 修改导入路径，使用绝对导入
-from celery_app import celery_app
+from app.celery_app import celery_app
 import requests
-from core import avd_manager, redis_client, task_status
+from app.core import avd_manager, redis_client, task_status
 import time
 
 @celery_app.task(name="tasks.tiktok.cleanup")
