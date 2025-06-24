@@ -15,19 +15,23 @@ class TikTokHandler:
     """处理TikTok的mitmproxy插件"""
     
     def __init__(self):
-        self.target_path = "/tiktok/user/relation/maf/list/v1"
+        self.suggestions_path = "/tiktok/user/relation/maf/list/v1"
     
     def response(self, flow: http.HTTPFlow) -> None:
         """处理HTTP响应"""
         # 检查请求路径是否匹配目标路径
-        if self.target_path in flow.request.pretty_url:
+        if self.suggestions_path in flow.request.pretty_url:
             ctx.log.info(f"\n{'='*50}")
             ctx.log.info(f"捕获到目标路径: {flow.request.pretty_url}")
             ctx.log.info(f"请求方法: {flow.request.method}")
             ctx.log.info(f"状态码: {flow.response.status_code}")
             ctx.log.info(f"响应头: {dict(flow.response.headers)}")
+            client_ip = flow.client_conn.address[0]
+            client_port = flow.client_conn.address[1]
+            ctx.log.info(f"客户端信息: {client_ip}:{client_port}")
 
-            if flow.response.status_code == 200:            
+
+            if flow.response.status_code == 200:
                 # 获取响应数据
                 try:
                     response_data = flow.response.content

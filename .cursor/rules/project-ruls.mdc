@@ -1,0 +1,49 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+项目目录:
+mitmproxy: mitmproxy + 证书/代理安装脚本 + mitmproxy脚本，程序在mitmproxy目录下运行
+fetcher: 数据获取服务，程序在fetcher目录下运行
+
+fetcher技术栈:
+- 语言: Python
+- 框架: FastAPI + celery + appium
+- 消息队列: redis
+- 缓存: redis
+
+
+总体设计思路
+1. fastapi提供两个接口
+   1.1 /tiktok/user/suggestions，POST请求，用于接受fetch任务。task_id外部任务id，由调用方生成，body如下：{"task_id":"1f35cebd29cf15ef6a7c453cdaffcddb","username":"deedydas","count":20,"follows":{"min":100,"max":1000}},其中task_id是基于Idempotency-Key生成的。还需要加上Idempotency-Key支持幂等。响应如下：{"task_id":"xxxxxxx","status":"pending","message":"任务已创建"}
+   1.2 /tiktok/user/data/capture，POST请求，用于接受抓包得到的tikttok app上用户主页suggested列表。
+   1.3 /tiktok/user/suggestions{task_id}, GET,任务状态查询接口
+2. clery提供3个任务：
+   2.1 接受接口1.1分发的任务，打开appium，appium连接AVD模拟器打开tiktok app，打开搜索1.1 接收到的username，打开第一个链接，打开主页，打开关注列表，切换suggested tab。等待接口1.2获取到的数据。对获取到的数据根据follows参数过滤。如果过滤后未达到所需count，在suggested列表滑动，触发翻页。继续等待接口1.2获取到的数据并过滤，直到达到count数。达到count后关闭tiktok app，然后触发task 2.2，并把数据给这个新task
+   2.2 task2.2 请求外部api，比如 https://api.fastkol.jerehu.top/tiktok/user/suggestions，具体接口路径你帮我想一下，可以换个更合适的。如果失败，可以过一段时间在执行，比如1分钟后，连续3次失败。如果成功或连续3次失败，触发资源清理task
+   2.3 资源清理task，清理redis stream、AVD_IP绑定、Idempotency-Key等redis资源。可以由前面的task触发，也可以定时执行，最好有一个兜底策略，比如60分钟后触发清理
+
+
+数据实时传递
+为了实现mitmproxy捕获数据后即时传递给Celery任务，可以：
+1. mitmproxy脚本将捕获的数据发送到FastAPI接口
+2. FastAPI接口将数据存入Redis，并使用Redis的stream通知对应的Celery任务
+3. Celery任务接收数据更新
+
+AVD与账号管理
+为了解决TikTok防爬机制问题，需要：
+1. 预先配置多个AVD设备，每个设备使用不同的TikTok账号
+2. 维护一个设备-账号映射表，存储在Redis中，这个在fastapi启动时从配置文件加载，然后写入redis
+3. 任务分配时，选择空闲的设备-账号对
+4. 设置设备使用冷却时间，避免频繁使用同一设备
+
+幂等性与任务状态管理
+- 使用 Idempotency-Key 头确保任务不会重复创建
+- 在Redis中存储任务状态和进度
+- 提供任务状态查询接口
+
+任务与设备映射
+为了解决多任务并行问题，我们需要建立任务ID与AVD设备的映射关系：
+1. 使用Redis存储映射关系： Idempotency-Key， AVD_ip，appium将关联存入redis
+2. 当mitmproxy脚本捕获到数据时，将数据与AVD_ip发送给接口1.2
