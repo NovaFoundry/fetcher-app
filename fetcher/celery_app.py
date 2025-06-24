@@ -20,5 +20,4 @@ celery_app.conf.update(
     result_expires=settings.celery_config.get("result_expires"),
 )
 
-# 自动发现任务，使用相对路径
-# celery_app.autodiscover_tasks(['tasks'])
+import tasks

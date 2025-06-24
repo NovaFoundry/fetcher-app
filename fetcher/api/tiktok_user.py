@@ -102,26 +102,14 @@ def create_suggestion_task(
                     status=status_info.get("status", "pending"),
                     message="任务已存在"
                 )
-    # 准备任务数据
-    task_data = {
-        "task_id": task_id,
-        "params": {
-            "username": request.username,
-
-            "count": request.count,
-            "follows": request.follows.dict() if request.follows else None,
-        }
-    }
 
     # 设置初始任务状态
     task_status_manager.set_status(task_id, "pending", 0)
-
-    
     
     # 分发Celery任务
     celery_app.send_task(
         "tasks.tiktok.process_suggestions",
-        args=(task_id, body.username, body.count, body.follows),
+        args=(task_id, body.username, body.count, body.follows.model_dump()),
         kwargs={}
     )
     
